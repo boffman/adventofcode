@@ -193,4 +193,4 @@ with open("input.txt", "r") as infile:
 #opcodes = [104,1125899906842624,99]
 
 computer = Computer(opcodes)
-computer.compute([1])
+computer.compute([2])
