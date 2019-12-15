@@ -1,7 +1,6 @@
 import math
 import logging
 import time
-from multiprocessing.dummy import Pool as ThreadPool
 
 class Map(object):
     def __init__(self):
@@ -161,7 +160,8 @@ m = Map()
 # input4, 0,372 sek
 # input5, 0,726 sek
 # input6, 156 sek
-m.read("test_input6.txt")
+# input, 346 sek
+m.read("input")
 
 #logging.info(m.count_detected_astroids(0, 0))
 # for y in range(m.rows):
