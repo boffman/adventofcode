@@ -2,6 +2,8 @@ from collections import namedtuple
 import itertools
 import math
 import time
+from math import gcd
+from functools import reduce
 
 #Vector3 = namedtuple("Vector3", ('x','y','z'))
 class Vector3(object):
@@ -24,6 +26,15 @@ class Moon(object):
     def __str__(self):
         return "|".join([str(self.pos),str(self.vel)])
     
+    def get_x_values(self):
+        return f"{self.pos.x}|{self.vel.x}"
+
+    def get_y_values(self):
+        return f"{self.pos.y}|{self.vel.y}"
+
+    def get_z_values(self):
+        return f"{self.pos.z}|{self.vel.z}"
+
     def print(self):
         print("pos=<{:3d},{:3d},{:3d}>, vel=<{:3d},{:3d},{:3d}>"\
             .format(self.pos.x, self.pos.y, self.pos.z,\
@@ -120,6 +131,16 @@ class Universe(object):
     def __str__(self):
         return ";".join([str(m) for m in self.moons])
 
+    def get_values(self, ix):
+        if ix == 0:
+            return ";".join([m.get_x_values() for m in self.moons])
+        elif ix == 1:
+            return ";".join([m.get_y_values() for m in self.moons])
+        elif ix == 2:
+            return ";".join([m.get_z_values() for m in self.moons])
+        else:
+            raise Exception("What are you trying now...??")
+
 
 p = Physics()
 
@@ -130,13 +151,26 @@ u.print_moons()
 n = time.perf_counter()
 
 counter = 0
-first_str = str(u)
-u_str = ""
-while u_str != first_str:
+axis_count = [None,None,None]
+str_axis = ["", "", ""]
+hist_axis = [set(), set(), set()]
+found_repeating = 0
+while found_repeating < 3:
+    for ix in range(3):
+        if axis_count[ix] is None:
+            str_axis[ix] = u.get_values(ix)
+            if str_axis[ix] in hist_axis[ix]:
+                axis_count[ix] = counter
+                print(f"Found repeating {ix} at count {counter}:")
+                u.print_moons()
+                found_repeating += 1
+                hist_axis[ix] = None
+            else:
+                hist_axis[ix].add(str_axis[ix]) 
+
     u.update()
-    u_str = str(u)
     counter += 1
-    if counter % 100000 == 0:
+    if counter % 1000000 == 0:
         print(counter)
         n2 = time.perf_counter()
         print("Time: {}".format(n2-n))
@@ -144,17 +178,8 @@ while u_str != first_str:
 n2 = time.perf_counter()
 print("Time: {}".format(n2-n))
 
-print("It took {} iterations:".format(counter))
-u.print_moons()
-# for _ in range(1000):
-#     for pair in itertools.combinations(moons, 2):
-#         p.update_velocity(pair[0], pair[1])
+def lcm(denominators):
+    return reduce(lambda a,b: a*b // gcd(a,b), denominators)
 
-#     for moon in moons:
-#         p.update_position(moon)
-
-# for moon in moons:
-#     print(moon)
-
-# total_energy = sum([e.get_total_energy() for e in moons])
-# print(total_energy)
+lowest_common_multiple = lcm(axis_count)
+print(f"It will repeat itself after {lowest_common_multiple} iterations")
