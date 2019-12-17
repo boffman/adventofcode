@@ -130,10 +130,9 @@ u.print_moons()
 n = time.perf_counter()
 
 counter = 0
-previous_states = set()
-u_str = str(u)
-while u_str not in previous_states:
-    previous_states.add(u_str)
+first_str = str(u)
+u_str = ""
+while u_str != first_str:
     u.update()
     u_str = str(u)
     counter += 1
