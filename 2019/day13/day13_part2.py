@@ -55,7 +55,7 @@ class Computer(threading.Thread):
                 return self.output.get(block=False)
 
     def has_output(self):
-        return not self.output.empty()
+        return self.output.qsize() > 0 #not self.output.empty()
 
     def has_input(self):
         return self.input.qsize() > 0
@@ -299,6 +299,8 @@ game.start()
 # pt = Point(100, 50)
 # pt.draw(win)
 
+#input_data = [int(x.strip()) for x in sys.argv[1].split(",")]
+
 screen = {}
 xres = 0
 yres = 0
@@ -309,21 +311,19 @@ started = False
 tile = None
 game_started = False
 steer_direction = None
-#game.add_input(1)
-#game.add_input(0)
-#game.add_input(0)
-#game.add_input(0)
-input_data = [0,0,0,0,0,0,0,0,0,-1,-1,-1,-1,-1,-1,0,0,0,0,0,0,0,0,0,0,0,0,-1,-1,-1,-1,-1,-1,-1,-1,0,0, 0,0,0,0,0,0, 0,0,0,0,0,   0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+input_data = []
+with open("jinput.txt", "r") as jfile:
+    for l in jfile:
+        for x in l.split(","):
+            if len(x) > 0:
+                input_data.append(int(x))
 xtra_input = []
-for i in input_data:
-    game.add_input(i)
-while game.is_running() or game.has_output():
-    #game.poke(0, 2)
-    if game_started:
-        time.sleep(0.2)
+# for i in input_data:
+#     game.add_input(i)
 
-    if game.has_output():
+while game.is_running() or game.has_output():
+
+    while game.has_output():
         x = game.get_output()
         y = game.get_output()
         tile = game.get_output()
@@ -336,24 +336,34 @@ while game.is_running() or game.has_output():
                 game_started = True
             ball_pos = (x,y)
 
-        #print(f"Tile at ({x},{y}) of type: {tile}")
         screen[(x,y)] = tile
         xres = max([x, xres])
         yres = max([y, yres])
-        #draw_screen(win, screen, xres, yres, 10)
-        print_screen(screen, xres, yres)
-        if steer_direction is not None:
-            print(f"score: {score}   steering: {steer_direction}  ball: {ball_pos}  pad: {tile_pos}  input q: {game.input.qsize()}")
-        
-        qsize = game.input.qsize()
-        print(f"score: {score}   ball: {ball_pos}  pad: {tile_pos}  input q: {qsize}  xtra: {xtra_input}")
+    #draw_screen(win, screen, xres, yres, 10)
+    print_screen(screen, xres, yres)
+    if steer_direction is not None:
+        print(f"score: {score}   steering: {steer_direction}  ball: {ball_pos}  pad: {tile_pos}  input q: {game.input.qsize()}")
+    
+    qsize = game.input.qsize()
+    oqsize = game.output.qsize()
+    print(f"score: {score}   ball: {ball_pos}  pad: {tile_pos}  input q: {qsize}  output q: {oqsize}")
 
-        if qsize == 0:
-            #print("INPUT: ")
-            #i = int(sys.stdin.readline().strip())
-            i = 0
-            game.add_input(i)
-            xtra_input.append(i)
+    if game_started:
+        time.sleep(0.01)
+
+    if qsize == 0 and game.is_waiting_for_input():
+        game.add_input(input_data.pop(0))
+        # print("INPUT: ")
+        # ival = sys.stdin.readline().strip()
+        # if ival == "":
+        #     i = 0
+        # else:
+        #     i = int(ival)
+        # #i = 0
+        # game.add_input(i)
+        # xtra_input.append(i)
+        # with open("jinput.txt", "a") as jfile:
+        #     jfile.write("," + str(i))
 
     # if game.is_waiting_for_input() and ball_pos is not None and tile_pos is not None:
     #     game_started = True

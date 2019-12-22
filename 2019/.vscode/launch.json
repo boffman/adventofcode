@@ -5,7 +5,15 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Current File",
+            "name": "Python: Current File w term",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+            "cwd": "${fileDirname}"
+        },
+        {
+            "name": "Python: Current File w console",
             "type": "python",
             "request": "launch",
             "program": "${file}",
